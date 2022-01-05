@@ -119,7 +119,7 @@ function App() {
         )}
       </AnimatePresence>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-white font-bold text-xl tracking-widest">Task List</h1>
+        <h1 className="text-white font-bold text-xl tracking-widest">Tasks List</h1>
         <div className="flex items-center">
           {/* <button className="text-white mr-4 text-md">
             <BsShare />
