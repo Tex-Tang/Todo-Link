@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/Tex-Tang/Todo-Link/server/models"
 	"github.com/gofiber/fiber/v2"
@@ -28,9 +27,7 @@ type UpdateTaskRequest struct {
 func main() {
 	viper.AutomaticEnv()
 
-	fmt.Println(viper.GetString("API_PORT"))
-
-	conn, err := sql.Open("pgx", viper.GetString("DATABSE_URL"))
+	conn, err := sql.Open("pgx", viper.GetString("DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
