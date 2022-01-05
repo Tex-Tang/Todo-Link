@@ -29,6 +29,7 @@ func main() {
 	viper.AddConfigPath(".")
 	viper.SetConfigName("app")
 	viper.SetConfigType("toml")
+	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Println(err)
 	}
