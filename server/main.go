@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/Tex-Tang/Todo-Link/server/models"
 	"github.com/gofiber/fiber/v2"
@@ -31,6 +32,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println(viper.GetString("DATABASE_URL"), viper.GetString("API_PORT"))
 
 	app := fiber.New()
 
