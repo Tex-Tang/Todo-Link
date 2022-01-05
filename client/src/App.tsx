@@ -1,57 +1,98 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { BsPlusLg } from "react-icons/bs";
+import AddTaskModal from "./components/AddTaskModal";
 import Task from "./components/Task";
 import TaskModal from "./components/TaskModal";
 import { ITaskResponse } from "./lib/response";
 
 function App() {
-  const [tasks, setTasks] = useState<ITaskResponse[]>([
+  const [data, setData] = useState<ITaskResponse[]>([
     {
       id: 1,
       title: "Learn about Polymer",
-      created_at: "Mon Apr 26 06:01:55 +0000 2015",
-      tags: ["Web Development", "Web Components"],
       is_completed: true,
     },
     {
       id: 2,
       title: "Watch Pluralsight course on Docker",
-      created_at: "Tue Mar 02 07:01:55 +0000 2015",
-      tags: ["Devops", "Docker"],
       is_completed: true,
     },
     {
       id: 3,
       title: "Complete presentation prep for Aurelia presentation",
-      created_at: "Wed Mar 05 10:01:55 +0000 2015",
-      tags: ["Presentation", "Aureia"],
       is_completed: false,
     },
     {
       id: 4,
       title: "Instrument creation of development environment with Puppet",
-      created_at: "Fri June 30 13:00:00 +0000 2015",
-      tags: ["Devops", "Puppet"],
       is_completed: false,
     },
     {
       id: 5,
       title: "Transition code base to ES6",
-      created_at: "Mon Aug 01 10:00:00 +0000 2015",
-      tags: ["ES6", "Web Development"],
       is_completed: false,
     },
   ]);
 
+  const focusTask = (dir: string, id: string) => {
+    const currentElement = document.getElementById(`task-${id}`);
+    if (currentElement) {
+      const elements = document.getElementsByClassName("task");
+      let index = 0;
+      for (let element of elements) {
+        if (element.id === currentElement.id) {
+          break;
+        }
+        index++;
+      }
+
+      if (dir === "prev" && elements[index - 1]) {
+        (elements[index - 1] as HTMLDivElement).focus();
+      } else if (dir === "next" && elements[index + 1]) {
+        (elements[index + 1] as HTMLDivElement).focus();
+      } else {
+        currentElement.focus();
+      }
+    }
+  };
+
+  const [selectedTask, setSelectedTask] = useState<ITaskResponse | null>(null);
+
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "c" && selectedTask === null) {
+      setIsTaskModalVisible(true);
+      e.preventDefault();
+      document.querySelector("input")?.focus();
+    }
+    if (e.key === "Escape") {
+      setIsTaskModalVisible(false);
+      setSelectedTask(null);
+    }
+
+    if (document.activeElement?.id.includes("task")) {
+      const currentId = document.activeElement.id.split("-")[1];
+      if (e.key === "ArrowDown") {
+        focusTask("next", currentId);
+      } else if (e.key === "ArrowUp") {
+        focusTask("prev", currentId);
+      }
+    }
+  };
+
   useEffect(() => {
-    document.onkeydown = (e) => {
-      e.key === "c" && setIsTaskModalVisible(true);
-      e.key === "Escape" && setIsTaskModalVisible(false);
-    };
-  }, []);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isTaskModalVisible, selectedTask]);
+
+  const onDelete = (task: ITaskResponse) => {
+    task.hidden = true;
+    setData([...data]);
+    focusTask("next", task.id.toString());
+    setSelectedTask(null);
+  };
 
   return (
     <div className="app max-w-md mx-auto mt-2 sm:mt-6 md:mt-12 p-5 mb-4">
@@ -59,7 +100,16 @@ function App() {
         {isTaskModalVisible && (
           <div className="fixed top-32 max-w-md left-1/2 p-4 w-full md:w-1/2 -translate-x-1/2 z-10">
             <motion.div initial={{ y: -20 }} animate={{ y: 0 }}>
-              <TaskModal
+              <AddTaskModal
+                onCreate={(task) => {
+                  setData([...data, task]);
+                  setIsTaskModalVisible(false);
+
+                  // Trick to wait for new task to be added to DOM
+                  setTimeout(() => {
+                    focusTask("current", task.id.toString());
+                  }, 100);
+                }}
                 onClose={() => {
                   setIsTaskModalVisible(false);
                 }}
@@ -78,44 +128,91 @@ function App() {
             onClick={() => {
               setIsTaskModalVisible(true);
             }}
-            className="text-white text-md focus:outline-none"
+            className="text-white text-md p-1 focus:outline-none border border-transparent focus:border-white rounded-md"
           >
             <BsPlusLg />
           </button>
         </div>
       </div>
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2">Todo</h2>
-      {tasks.map((todo) => (
+      {data.map((task) => (
         <AnimatePresence>
-          {!todo.is_completed && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: 50 }}>
+          {!task.is_completed && !task.hidden && (
+            <motion.div
+              className="overflow-hidden"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0 }}
+            >
               <Task
+                onDelete={onDelete}
+                onClick={(task: ITaskResponse) => {
+                  setSelectedTask(task);
+                }}
                 onCheck={(task: ITaskResponse) => {
                   task.is_completed = true;
-                  setTasks([...tasks]);
+                  setData([...data]);
                 }}
-                task={todo}
+                task={task}
               ></Task>
             </motion.div>
           )}
         </AnimatePresence>
       ))}
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2 mt-4">Completed</h2>
-      {tasks.map((todo) => (
+      {data.map((task) => (
         <AnimatePresence>
-          {todo.is_completed && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: 50 }}>
+          {task.is_completed && !task.hidden && (
+            <motion.div
+              className="overflow-hidden"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0 }}
+            >
               <Task
+                onDelete={onDelete}
+                onClick={(task: ITaskResponse) => {
+                  setSelectedTask(task);
+                }}
                 onCheck={(task: ITaskResponse) => {
                   task.is_completed = false;
-                  setTasks([...tasks]);
+                  setData([...data]);
                 }}
-                task={todo}
+                task={task}
               ></Task>
             </motion.div>
           )}
         </AnimatePresence>
       ))}
+      <div className="fixed top-32 max-w-md left-1/2 p-4 w-full md:w-1/2 -translate-x-1/2 z-10">
+        {selectedTask && (
+          <TaskModal
+            onDelete={onDelete}
+            onEdit={(task) => {
+              setData([...data]);
+              focusTask("current", selectedTask.id.toString());
+              setSelectedTask(null);
+            }}
+            onClose={() => {
+              setSelectedTask(null);
+            }}
+            task={selectedTask}
+          />
+        )}
+      </div>
+      {(selectedTask || isTaskModalVisible) && (
+        <div
+          className="fixed top-0 left-0 h-full w-full"
+          style={{
+            background: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(3px)",
+          }}
+          onClick={() => {
+            setSelectedTask(null);
+            setIsTaskModalVisible(false);
+          }}
+        ></div>
+      )}
     </div>
   );
 }
