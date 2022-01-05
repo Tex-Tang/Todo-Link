@@ -30,7 +30,7 @@ func main() {
 	viper.SetConfigName("app")
 	viper.SetConfigType("toml")
 	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	conn, err := sql.Open("pgx", fmt.Sprintf(
