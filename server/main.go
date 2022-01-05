@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/Tex-Tang/Todo-Link/server/models"
 	"github.com/gofiber/fiber/v2"
@@ -180,8 +179,6 @@ func main() {
 			"message": "Task deleted",
 		})
 	})
-
-	fmt.Println(viper.GetString("DATABASE_URL"), viper.GetString("PORT"))
 
 	app.Listen(":" + viper.GetString("PORT"))
 }
