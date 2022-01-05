@@ -33,8 +33,6 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(viper.GetString("DATABASE_URL"), viper.GetString("API_PORT"))
-
 	app := fiber.New()
 
 	api := app.Group("/api")
@@ -182,6 +180,8 @@ func main() {
 			"message": "Task deleted",
 		})
 	})
+
+	fmt.Println(viper.GetString("DATABASE_URL"), viper.GetString("API_PORT"))
 
 	app.Listen(":" + viper.GetString("API_PORT"))
 }
