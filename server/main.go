@@ -181,7 +181,7 @@ func main() {
 		})
 	})
 
-	fmt.Println(viper.GetString("DATABASE_URL"), viper.GetString("API_PORT"))
+	fmt.Println(viper.GetString("DATABASE_URL"), viper.GetString("PORT"))
 
-	app.Listen(":" + viper.GetString("API_PORT"))
+	app.Listen(":" + viper.GetString("PORT"))
 }
