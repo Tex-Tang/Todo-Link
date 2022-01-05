@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { BsPlusLg } from "react-icons/bs";
+import { BsKeyboard, BsPlusLg } from "react-icons/bs";
 import AddTaskModal from "./components/AddTaskModal";
 import Task from "./components/Task";
 import TaskModal from "./components/TaskModal";
@@ -124,6 +124,34 @@ function App() {
           {/* <button className="text-white mr-4 text-md">
             <BsShare />
           </button> */}
+          <button className="keyboard-btn relative text-white text-xl p-1 focus:outline-none border border-transparent focus:border-white rounded-md">
+            <BsKeyboard />
+            <div className="shortcuts-container p-2 absolute bot-0 -right-9 w-64 z-20 hidden">
+              <div className="task-modal text-left w-full p-2 py-3 text-sm rounded-lg">
+                <div className="flex items-center mb-2">
+                  <span className="font-mono px-2 py-0.5 bg-gray-800 create-btn mr-1">c</span> Create task
+                </div>
+                <div className="flex items-center mb-2">
+                  <span className="font-mono px-2 py-0.5 bg-gray-800 create-btn mr-1">&#x232b;</span> Delete task
+                </div>
+                <div className="flex items-center mb-2">
+                  <span className="font-mono px-2 py-0.5 bg-gray-800 create-btn mr-1">&uarr;</span> Previous task
+                </div>
+                <div className="flex items-center mb-2">
+                  <span className="font-mono px-2 py-0.5 bg-gray-800 create-btn mr-1">&darr;</span> Next task
+                </div>
+                <div className="flex items-center mb-2">
+                  <span className="font-mono px-2 py-0.5 bg-gray-800 create-btn mr-1">e</span> Edit
+                </div>
+                <div className="flex items-center mb-2">
+                  <span className="font-mono px-2 py-0.5 bg-gray-800 create-btn mr-1">Esc</span> Back
+                </div>
+                <div className="flex items-center">
+                  <span className="font-mono px-2 py-0.5 bg-gray-800 create-btn mr-1">Tab</span> Navigate around
+                </div>
+              </div>
+            </div>
+          </button>
           <button
             onClick={() => {
               setIsTaskModalVisible(true);
