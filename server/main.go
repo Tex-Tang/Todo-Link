@@ -26,22 +26,11 @@ type UpdateTaskRequest struct {
 }
 
 func main() {
-	viper.AddConfigPath(".")
-	viper.SetConfigName("app")
-	viper.SetConfigType("toml")
 	viper.AutomaticEnv()
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(err)
-	}
 
-	conn, err := sql.Open("pgx", fmt.Sprintf(
-		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
-		viper.GetString("psql.user"),
-		viper.GetString("psql.pass"),
-		viper.GetString("psql.host"),
-		viper.GetString("psql.port"),
-		viper.GetString("psql.dbname"),
-	))
+	fmt.Println(viper.GetString("API_PORT"))
+
+	conn, err := sql.Open("pgx", viper.GetString("DATABSE_URL"))
 	if err != nil {
 		panic(err)
 	}
@@ -194,5 +183,5 @@ func main() {
 		})
 	})
 
-	app.Listen(":" + viper.GetString("api.port"))
+	app.Listen(":" + viper.GetString("API_PORT"))
 }
