@@ -19,7 +19,7 @@ const Task: React.FC<TaskProps> = ({ task, onCheck, onClick, onDelete }) => {
         background: "rgba(0, 0, 0, 0.1)",
       }}
       onKeyDown={(e) => {
-        if (e.key === "Enter") {
+        if (e.key === "Enter" || e.key === "e") {
           onClick(task);
         } else if (e.key === "Backspace") {
           onDelete(task);
