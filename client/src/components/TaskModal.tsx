@@ -23,6 +23,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onDelete, onEdit, onClose }
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "e") {
       setEditable(true);
+      e.preventDefault();
     } else if (e.key === "Backspace" && !editable) {
       onDelete(task);
     }
