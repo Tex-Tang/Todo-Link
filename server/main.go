@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/Tex-Tang/todo-link/models"
+	"github.com/Tex-Tang/Todo-Link/server/models"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/segmentio/ksuid"

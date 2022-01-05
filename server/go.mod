@@ -1,4 +1,4 @@
-module github.com/Tex-Tang/todo-link
+module github.com/Tex-Tang/Todo-Link/server
 
 go 1.16
 
