@@ -193,5 +193,5 @@ func main() {
 		})
 	})
 
-	app.Listen(":3333")
+	app.Listen(":" + viper.GetString("api.port"))
 }
