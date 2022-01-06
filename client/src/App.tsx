@@ -229,14 +229,14 @@ function App() {
         </div>
       </div>
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2">Todo</h2>
-      {!data.length && <div className="text-gray-300 text-sm">Loading...</div>}
+      {isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
       {incompleted.map((task) => (
         <AnimatePresence key={task.id}>
           <Task onCheck={onCheck} onSelect={onSelect} task={task} />
         </AnimatePresence>
       ))}
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2 mt-4">Completed</h2>
-      {!data.length && <div className="text-gray-300 text-sm">Loading...</div>}
+      {isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
       {completed.map((task) => (
         <AnimatePresence key={task.id}>
           <Task onCheck={onCheck} onSelect={onSelect} task={task} />
