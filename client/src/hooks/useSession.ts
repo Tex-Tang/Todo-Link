@@ -11,7 +11,10 @@ export default function useSession() {
     setIsLoading(true);
     setError(null);
 
-    const sessionId = localStorage.getItem("SESSION_ID") || window.location.pathname.split("/")[1];
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+
+    const sessionId = localStorage.getItem("SESSION_ID") || params.session_id;
     if (!sessionId) {
       CreateSession({
         title: "Tasks List",

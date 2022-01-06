@@ -163,7 +163,7 @@ function App() {
         <div className="flex items-center">
           <button
             onClick={() => {
-              navigator.clipboard.writeText(window.location.origin + "/" + session?.id);
+              navigator.clipboard.writeText(window.location.origin + "/?session_id=" + session?.id);
             }}
             className="text-white mr-4 text-md"
           >
