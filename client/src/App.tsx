@@ -125,7 +125,19 @@ function App() {
     }
 
     const nextIdToFocus = getTaskElementId("next", task.id);
-    setData([...data.filter((t) => t.id !== task.id), { ...task, ...dataToUpdate }]);
+    const newTask = {
+      id: task.id,
+      title: task.title,
+      completed_at: dataToUpdate.completed_at,
+      created_at: task.created_at,
+      updated_at: task.updated_at,
+    };
+    setData([
+      ...data.filter((t) => t.id !== task.id && !t.completed_at),
+      ...(!newTask.completed_at ? [newTask] : []),
+      ...data.filter((t) => t.id !== task.id && t.completed_at),
+      ...(newTask.completed_at ? [newTask] : []),
+    ]);
     UpdateTask(task.id, dataToUpdate)
       .then(() => {
         nextIdToFocus && focusTaskElement(nextIdToFocus);
