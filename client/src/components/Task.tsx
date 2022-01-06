@@ -11,7 +11,7 @@ export interface TaskProps extends Omit<HTMLMotionProps<"div">, "onSelect"> {
 const Task: React.FC<TaskProps> = ({ task, onCheck, onSelect }) => {
   return (
     <motion.div
-      tabIndex={0}
+      tabIndex={1}
       id={`task-${task.id}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}

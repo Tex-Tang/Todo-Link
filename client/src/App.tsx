@@ -76,7 +76,6 @@ function App() {
       setSelectedTask(null);
     }
 
-    console.log(document.activeElement);
     if (document.activeElement?.id.includes("task")) {
       const currentId = document.activeElement.id.split("-")[1];
       if (e.key === "ArrowDown") {
@@ -94,6 +93,11 @@ function App() {
         } else if (e.key === "Backspace") {
           onDelete(task);
         } else if (e.key === "Enter") {
+          let idToFocus = getTaskElementId("prev", task.id);
+          if (task.id === completed[0].id || task.id === incompleted[0].id) {
+            idToFocus = getTaskElementId("next", task.id);
+          }
+          idToFocus && focusTaskElement(idToFocus);
           onCheck(task);
         }
       }
@@ -140,11 +144,6 @@ function App() {
       setIncompleted([...incompleted, { ...task, completed_at: null }]);
     }
 
-    let idToFocus = getTaskElementId("prev", task.id);
-    if (task.id === completed[0].id || task.id === incompleted[0].id) {
-      idToFocus = getTaskElementId("next", task.id);
-    }
-    idToFocus && focusTaskElement(idToFocus);
     UpdateTask(task.id, dataToUpdate)
       .then(() => {})
       .catch(() => {
@@ -207,17 +206,19 @@ function App() {
         <h1 className="text-white font-bold text-xl tracking-widest">{session ? session?.title : "Loading..."}</h1>
         <div className="flex items-center justify-between w-28">
           <IconButton
+            tabIndex={2}
             onClick={() => {
               navigator.clipboard.writeText(window.location.origin + "/?session_id=" + session?.id);
             }}
           >
             <BsShare />
           </IconButton>
-          <IconButton className="keyboard-btn">
+          <IconButton tabIndex={2} className="keyboard-btn">
             <BsKeyboard />
             <KeyboardDropdown />
           </IconButton>
           <IconButton
+            tabIndex={2}
             onClick={() => {
               setIsTaskModalVisible(true);
             }}
