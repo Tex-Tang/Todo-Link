@@ -173,7 +173,9 @@ function App() {
         )}
       </AnimatePresence>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-white font-bold text-xl tracking-widest">{isLoading ? "Loading..." : session?.title}</h1>
+        <h1 className="text-white font-bold text-xl tracking-widest">
+          {!session && isLoading ? "Loading..." : session?.title}
+        </h1>
         <div className="flex items-center">
           <button
             onClick={() => {
@@ -198,7 +200,7 @@ function App() {
         </div>
       </div>
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2">Todo</h2>
-      {isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
+      {!data.length && isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
       {data?.map((task) => (
         <AnimatePresence>
           {!task.completed_at && (
@@ -214,7 +216,7 @@ function App() {
         </AnimatePresence>
       ))}
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2 mt-4">Completed</h2>
-      {isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
+      {!data.length && isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
       {data?.map((task) => (
         <AnimatePresence>
           {task.completed_at && (
