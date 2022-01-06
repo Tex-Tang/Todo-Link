@@ -48,8 +48,14 @@ const focusTask = (dir: string, id: string) => {
 function App() {
   const { session } = useSession();
 
-  const { data, refetch } = useQuery(["list-tasks", session], () =>
-    session ? ListTasks({ session_id: session.id }) : null
+  const [data, setData] = useState<ITaskResponse[]>([]);
+
+  const { isLoading, refetch } = useQuery(
+    ["list-tasks", session],
+    () => (session ? ListTasks({ session_id: session.id }) : null),
+    {
+      onSuccess: (data) => setData(data || []),
+    }
   );
 
   const [selectedTask, setSelectedTask] = useState<ITaskResponse | null>(null);
@@ -90,36 +96,41 @@ function App() {
 
   const onDelete = (task: ITaskResponse) => {
     const nextIdToFocus = getTaskElementId("next", task.id);
-    DeleteTask(task.id).then(() => {
-      refetch().then(() => {
+    setData(data.filter((t) => t.id !== task.id));
+    DeleteTask(task.id)
+      .then(() => {
         setSelectedTask(null);
         nextIdToFocus && focusTaskElement(nextIdToFocus);
+      })
+      .catch(() => {
+        setData([...data, task]);
       });
-    });
   };
 
   const onCreate = (task: ITaskResponse) => {
     setIsTaskModalVisible(false);
-    refetch().then(() => {
-      const element = document.getElementById(`task-${task.id}`);
-      if (element) {
-        element.focus();
-      }
-    });
+    setData([...data, task]);
+    const element = document.getElementById(`task-${task.id}`);
+    if (element) {
+      element.focus();
+    }
   };
 
   const onCheck = (task: ITaskResponse) => {
-    const data: IUpdateTaskRequest = { title: task.title };
+    const dataToUpdate: IUpdateTaskRequest = { title: task.title };
     if (!task.completed_at) {
-      data.completed_at = new Date();
+      dataToUpdate.completed_at = new Date();
     }
 
     const nextIdToFocus = getTaskElementId("next", task.id);
-    UpdateTask(task.id, data).then(() => {
-      refetch().then(() => {
+    setData([...data.filter((t) => t.id !== task.id), { ...task, ...dataToUpdate }]);
+    UpdateTask(task.id, dataToUpdate)
+      .then(() => {
         nextIdToFocus && focusTaskElement(nextIdToFocus);
+      })
+      .catch(() => {
+        setData([...data, task]);
       });
-    });
   };
 
   const onSelect = (task: ITaskResponse) => {
@@ -128,12 +139,15 @@ function App() {
 
   const onEdit = (task: ITaskResponse) => {
     if (selectedTask) {
-      UpdateTask(selectedTask.id, task).then(() => {
-        refetch().then(() => {
+      setData([...data.filter((t) => t.id !== selectedTask.id), task]);
+      UpdateTask(selectedTask.id, task)
+        .then(() => {
           focusTask("current", selectedTask.id);
           setSelectedTask(null);
+        })
+        .catch(() => {
+          refetch();
         });
-      });
     }
   };
 
@@ -159,7 +173,7 @@ function App() {
         )}
       </AnimatePresence>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-white font-bold text-xl tracking-widest">{session?.title}</h1>
+        <h1 className="text-white font-bold text-xl tracking-widest">{isLoading ? "Loading..." : session?.title}</h1>
         <div className="flex items-center">
           <button
             onClick={() => {
@@ -184,6 +198,7 @@ function App() {
         </div>
       </div>
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2">Todo</h2>
+      {isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
       {data?.map((task) => (
         <AnimatePresence>
           {!task.completed_at && (
@@ -199,6 +214,7 @@ function App() {
         </AnimatePresence>
       ))}
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2 mt-4">Completed</h2>
+      {isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
       {data?.map((task) => (
         <AnimatePresence>
           {task.completed_at && (

@@ -47,13 +47,14 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ task: defaultTask, onCreate
       <input
         {...register("title", { required: true })}
         type="text"
+        disabled={createTaskMutation.isLoading}
         placeholder="Title"
         className="bg-transparent mb-4 w-full border-gray-400 border rounded px-2 py-2 text-sm focus:border-white focus:outline-none"
       />
 
       <div className="flex justify-end">
         <button type="submit" className="create-btn text-smc px-4 py-1">
-          Create
+          {createTaskMutation.isLoading ? "Loading..." : "Create"}
         </button>
       </div>
     </form>
