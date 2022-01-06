@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { AiOutlineCloseCircle } from "react-icons/ai";
-import { ITaskResponse } from "../lib/response";
+import { ITaskResponse } from "../api/response";
 
 export interface TaskModalProps {
   task: ITaskResponse;
