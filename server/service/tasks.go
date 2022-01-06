@@ -21,20 +21,15 @@ type CreateTaskRequest struct {
 func CreateTask(c *fiber.Ctx) error {
 	var request CreateTaskRequest
 	if err := c.BodyParser(&request); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return ErrBadRequest
 	}
 
 	session, err := model.Sessions(model.SessionWhere.ID.EQ(request.SessionID)).OneG(c.Context())
 	if err != nil && err != sql.ErrNoRows {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		fmt.Println(err)
+		return ErrInternalServerError
 	} else if err == sql.ErrNoRows {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": "Session not found",
-		})
+		return ErrSessionNotFound
 	}
 
 	task := model.Task{
@@ -44,7 +39,8 @@ func CreateTask(c *fiber.Ctx) error {
 	}
 
 	if err = task.InsertG(c.Context(), boil.Infer()); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		fmt.Println(err)
+		return ErrInternalServerError
 	}
 
 	return c.JSON(task)
@@ -59,6 +55,7 @@ func ListTasks(c *fiber.Ctx) error {
 
 	session, err := model.FindSessionG(c.Context(), c.Query("session_id"))
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err)
 		return ErrInternalServerError
 	} else if err == sql.ErrNoRows {
 		return ErrSessionNotFound
@@ -87,6 +84,7 @@ func UpdateTask(c *fiber.Ctx) error {
 
 	task, err := model.FindTaskG(c.Context(), c.Params("id"))
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err)
 		return ErrInternalServerError
 	} else if err == sql.ErrNoRows {
 		return ErrTaskNotFound
@@ -102,6 +100,7 @@ func UpdateTask(c *fiber.Ctx) error {
 
 	_, err = task.UpdateG(c.Context(), boil.Infer())
 	if err != nil {
+		fmt.Println(err)
 		return ErrInternalServerError
 	}
 
@@ -111,6 +110,7 @@ func UpdateTask(c *fiber.Ctx) error {
 func DeleteTask(c *fiber.Ctx) error {
 	task, err := model.FindTaskG(c.Context(), c.Params("id"))
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err)
 		return ErrInternalServerError
 	} else if err == sql.ErrNoRows {
 		return ErrTaskNotFound
@@ -118,6 +118,7 @@ func DeleteTask(c *fiber.Ctx) error {
 
 	_, err = task.DeleteG(c.Context())
 	if err != nil {
+		fmt.Println(err)
 		return ErrInternalServerError
 	}
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/Tex-Tang/Todo-Link/server/model"
 	"github.com/gofiber/fiber/v2"
@@ -27,6 +28,7 @@ func CreateSession(c *fiber.Ctx) error {
 	err := session.InsertG(c.Context(), boil.Infer())
 
 	if err != nil {
+		fmt.Println(err)
 		return ErrInternalServerError
 	}
 
@@ -37,6 +39,7 @@ func RetrieveSession(c *fiber.Ctx) error {
 	session, err := model.FindSessionG(c.Context(), c.Params("id"))
 
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err)
 		return ErrInternalServerError
 	} else if err == sql.ErrNoRows {
 		return ErrBadRequest
@@ -54,6 +57,7 @@ func UpdateSession(c *fiber.Ctx) error {
 	session, err := model.FindSessionG(c.Context(), c.Params("id"))
 
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err)
 		return ErrInternalServerError
 	} else if err == sql.ErrNoRows {
 		return ErrBadRequest
@@ -64,6 +68,7 @@ func UpdateSession(c *fiber.Ctx) error {
 	_, err = session.UpdateG(c.Context(), boil.Infer())
 
 	if err != nil {
+		fmt.Println(err)
 		return ErrInternalServerError
 	}
 
