@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { FaCheckCircle } from "react-icons/fa";
-import { ITaskResponse } from "../lib/response";
+import { ITaskResponse } from "../api/response";
 
 export interface TaskProps {
   task: ITaskResponse;
@@ -18,13 +18,6 @@ const Task: React.FC<TaskProps> = ({ task, onCheck, onClick, onDelete }) => {
       style={{
         background: "rgba(0, 0, 0, 0.1)",
       }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === "e") {
-          onClick(task);
-        } else if (e.key === "Backspace") {
-          onDelete(task);
-        }
-      }}
       onClick={() => onClick(task)}
     >
       <motion.div className="flex">
@@ -35,7 +28,7 @@ const Task: React.FC<TaskProps> = ({ task, onCheck, onClick, onDelete }) => {
             onCheck(task);
           }}
         >
-          {task.is_completed ? (
+          {task.completed_at ? (
             <motion.div className="w-4 h-4 flex-shrink-0 flex-grow-0">
               <FaCheckCircle className="text-white" style={{ fontSize: "1rem" }} />
             </motion.div>

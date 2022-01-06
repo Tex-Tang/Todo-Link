@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { MdClose } from "react-icons/md";
-import { ITaskResponse } from "../lib/response";
+import { useMutation } from "react-query";
+import { ICreateTaskRequest } from "../api/request";
+import { ITaskResponse } from "../api/response";
+import { CreateTask } from "../api/tasks";
+import useSession from "../hooks/useSession";
 
 export interface AddTaskModalProps {
   task?: ITaskResponse;
@@ -9,21 +14,30 @@ export interface AddTaskModalProps {
 }
 
 const AddTaskModal: React.FC<AddTaskModalProps> = ({ task: defaultTask, onCreate, onClose }) => {
-  const [task, setTask] = useState<ITaskResponse>(
-    defaultTask || {
-      id: Date.now(),
-      title: "",
-      is_completed: false,
+  const { session } = useSession();
+  useEffect(() => {
+    if (session) {
+      setValue("session_id", session.id);
     }
-  );
+  }, [session]);
+
+  const { register, handleSubmit, setValue } = useForm<ICreateTaskRequest>();
+
+  const createTaskMutation = useMutation("create-task", (data: ICreateTaskRequest) => CreateTask(data), {
+    onSuccess: (data: ITaskResponse) => {
+      onCreate(data);
+    },
+  });
 
   return (
     <form
       className="w-full bg-white z-10 p-4 task-modal"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onCreate(task);
-      }}
+      onSubmit={handleSubmit((data: ICreateTaskRequest) => {
+        createTaskMutation.mutate({
+          ...data,
+          session_id: session ? session.id : "",
+        });
+      })}
     >
       <div className="flex mb-4 justify-between items-center">
         <h3 className="font-semibold">New Task</h3>
@@ -31,12 +45,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ task: defaultTask, onCreate
       </div>
 
       <input
-        onChange={(e) => {
-          setTask({
-            ...task,
-            title: e.target.value,
-          });
-        }}
+        {...register("title", { required: true })}
         type="text"
         placeholder="Title"
         className="bg-transparent mb-4 w-full border-gray-400 border rounded px-2 py-2 text-sm focus:border-white focus:outline-none"

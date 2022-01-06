@@ -2,11 +2,15 @@ package service
 
 import (
 	"database/sql"
+	"fmt"
+	"time"
 
 	"github.com/Tex-Tang/Todo-Link/server/model"
 	"github.com/gofiber/fiber/v2"
 	"github.com/segmentio/ksuid"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type CreateTaskRequest struct {
@@ -61,8 +65,9 @@ func ListTasks(c *fiber.Ctx) error {
 	}
 
 	var tasks []*model.Task
-	tasks, err = model.Tasks(model.TaskWhere.SessionID.EQ(session.ID)).AllG(c.Context())
+	tasks, err = model.Tasks(model.TaskWhere.SessionID.EQ(session.ID), qm.OrderBy("completed_at"), qm.OrderBy("created_at")).AllG(c.Context())
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err)
 		return ErrInternalServerError
 	}
 
@@ -70,7 +75,8 @@ func ListTasks(c *fiber.Ctx) error {
 }
 
 type UpdateTaskRequest struct {
-	Title string `json:"title" validate:"required"`
+	Title       string     `json:"title" validate:"required"`
+	CompletedAt *time.Time `json:"completed_at"`
 }
 
 func UpdateTask(c *fiber.Ctx) error {
@@ -87,6 +93,12 @@ func UpdateTask(c *fiber.Ctx) error {
 	}
 
 	task.Title = request.Title
+
+	if request.CompletedAt != nil {
+		task.CompletedAt = null.TimeFromPtr(request.CompletedAt)
+	} else {
+		task.CompletedAt = null.Time{}
+	}
 
 	_, err = task.UpdateG(c.Context(), boil.Infer())
 	if err != nil {
