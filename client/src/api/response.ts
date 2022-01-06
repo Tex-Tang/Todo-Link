@@ -15,10 +15,7 @@ export interface ISessionResponse {
 export interface ITaskResponse {
   id: string;
   title: string;
-  completed_at?: Date;
+  completed_at: Date | null;
   created_at: Date;
   updated_at: Date;
-
-  // Extra properties for animation purpose
-  hidden?: boolean;
 }

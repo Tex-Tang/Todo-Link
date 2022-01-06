@@ -21,5 +21,5 @@ export interface IListTasksRequest {
 
 export interface IUpdateTaskRequest {
   title: string;
-  completed_at?: Date;
+  completed_at?: Date | null;
 }

@@ -6,43 +6,17 @@ import { IUpdateTaskRequest } from "./api/request";
 import { ITaskResponse } from "./api/response";
 import { DeleteTask, ListTasks, UpdateTask } from "./api/tasks";
 import AddTaskModal from "./components/AddTaskModal";
+import IconButton from "./components/IconButton";
 import KeyboardDropdown from "./components/KeyboardDropdown";
 import Task from "./components/Task";
 import TaskModal from "./components/TaskModal";
 import useSession from "./hooks/useSession";
-
-const getTaskElementId = (dir: string, id: string) => {
-  const currentElement = document.getElementById(`task-${id}`);
-  if (currentElement) {
-    const elements = document.getElementsByClassName("task");
-    let index = 0;
-    for (let element of elements) {
-      if (element.id === currentElement.id) {
-        break;
-      }
-      index++;
-    }
-
-    if (dir === "prev" && elements[index - 1]) {
-      return elements[index - 1].id.replace("task-", "");
-    } else if (dir === "next" && elements[index + 1]) {
-      return elements[index + 1].id.replace("task-", "");
-    } else {
-      return id;
-    }
-  }
-};
 
 const focusTaskElement = (id: string) => {
   const element = document.getElementById("task-" + id);
   if (element) {
     element.focus();
   }
-};
-
-const focusTask = (dir: string, id: string) => {
-  const nextId = getTaskElementId(dir, id);
-  if (nextId) focusTaskElement(nextId);
 };
 
 function App() {
@@ -54,12 +28,44 @@ function App() {
     ["list-tasks", session],
     () => (session ? ListTasks({ session_id: session.id }) : null),
     {
-      onSuccess: (data) => setData(data || []),
+      onSuccess: (data) => {
+        if (data) {
+          setCompleted(data.filter((task) => task.completed_at));
+          setIncompleted(data.filter((task) => !task.completed_at));
+        }
+      },
     }
   );
 
+  const [completed, setCompleted] = useState<ITaskResponse[]>([]);
+  const [incompleted, setIncompleted] = useState<ITaskResponse[]>([]);
+
   const [selectedTask, setSelectedTask] = useState<ITaskResponse | null>(null);
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
+
+  const getTaskElementId = (dir: string, id: string) => {
+    const data = [...incompleted, ...completed];
+    let index = 0;
+    for (let task of data) {
+      if (task.id === id) {
+        break;
+      }
+      index++;
+    }
+
+    if (dir === "prev" && data[index - 1]) {
+      return data[index - 1].id;
+    } else if (dir === "next" && data[index + 1]) {
+      return data[index + 1].id;
+    } else {
+      return id;
+    }
+  };
+
+  const focusTask = (dir: string, id: string) => {
+    const nextId = getTaskElementId(dir, id);
+    if (nextId) focusTaskElement(nextId);
+  };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "c" && selectedTask === null && !isTaskModalVisible) {
@@ -72,6 +78,7 @@ function App() {
       setSelectedTask(null);
     }
 
+    console.log(document.activeElement);
     if (document.activeElement?.id.includes("task")) {
       const currentId = document.activeElement.id.split("-")[1];
       if (e.key === "ArrowDown") {
@@ -80,7 +87,8 @@ function App() {
         focusTask("prev", currentId);
       }
 
-      const task = data?.find((task) => task.id === currentId);
+      const task =
+        completed?.find((task) => task.id === currentId) || incompleted?.find((task) => task.id === currentId);
       if (task) {
         if (e.key === "e") {
           e.preventDefault();
@@ -96,22 +104,28 @@ function App() {
 
   const onDelete = (task: ITaskResponse) => {
     const nextIdToFocus = getTaskElementId("next", task.id);
-    task.hidden = true;
-    setData([...data]);
+    if (task.completed_at) {
+      setCompleted(completed.filter((t) => t.id !== task.id));
+    } else {
+      setIncompleted(incompleted.filter((t) => t.id !== task.id));
+    }
     DeleteTask(task.id)
       .then(() => {
         setSelectedTask(null);
         nextIdToFocus && focusTaskElement(nextIdToFocus);
       })
       .catch(() => {
-        task.hidden = false;
-        setData([...data]);
+        if (task.completed_at) {
+          setCompleted([...completed, task]);
+        } else {
+          setIncompleted([...incompleted, task]);
+        }
       });
   };
 
   const onCreate = (task: ITaskResponse) => {
     setIsTaskModalVisible(false);
-    setData([...data, task]);
+    setIncompleted([...incompleted, task]);
     const element = document.getElementById(`task-${task.id}`);
     if (element) {
       element.focus();
@@ -122,28 +136,28 @@ function App() {
     const dataToUpdate: IUpdateTaskRequest = { title: task.title };
     if (!task.completed_at) {
       dataToUpdate.completed_at = new Date();
+      setIncompleted(incompleted.filter((t) => t.id !== task.id));
+      setCompleted([...completed, { ...task, completed_at: dataToUpdate.completed_at }]);
+    } else {
+      setCompleted(completed.filter((t) => t.id !== task.id));
+      setIncompleted([...incompleted, { ...task, completed_at: null }]);
     }
 
-    const nextIdToFocus = getTaskElementId("next", task.id);
-    const newTask = {
-      id: task.id,
-      title: task.title,
-      completed_at: dataToUpdate.completed_at,
-      created_at: task.created_at,
-      updated_at: task.updated_at,
-    };
-    setData([
-      ...data.filter((t) => t.id !== task.id && !t.completed_at),
-      ...(!newTask.completed_at ? [newTask] : []),
-      ...data.filter((t) => t.id !== task.id && t.completed_at),
-      ...(newTask.completed_at ? [newTask] : []),
-    ]);
+    let idToFocus = getTaskElementId("prev", task.id);
+    if (task.id === completed[0].id || task.id === incompleted[0].id) {
+      idToFocus = getTaskElementId("next", task.id);
+    }
+    idToFocus && focusTaskElement(idToFocus);
     UpdateTask(task.id, dataToUpdate)
-      .then(() => {
-        nextIdToFocus && focusTaskElement(nextIdToFocus);
-      })
+      .then(() => {})
       .catch(() => {
-        setData([...data, task]);
+        if (task.completed_at) {
+          setCompleted([...completed, task]);
+          setIncompleted(incompleted.filter((t) => t.id !== task.id));
+        } else {
+          setIncompleted([...incompleted, task]);
+          setCompleted(completed.filter((t) => t.id !== task.id));
+        }
       });
   };
 
@@ -153,7 +167,13 @@ function App() {
 
   const onEdit = (task: ITaskResponse) => {
     if (selectedTask) {
-      setData([...data.filter((t) => t.id !== selectedTask.id), task]);
+      if (task.completed_at) {
+        setCompleted(completed.filter((t) => t.id !== task.id));
+        setIncompleted([...incompleted, task]);
+      } else {
+        setIncompleted(incompleted.filter((t) => t.id !== task.id));
+        setCompleted([...completed, task]);
+      }
       UpdateTask(selectedTask.id, task)
         .then(() => {
           focusTask("current", selectedTask.id);
@@ -168,7 +188,7 @@ function App() {
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isTaskModalVisible, selectedTask, data]);
+  }, [isTaskModalVisible, selectedTask, completed, incompleted]);
 
   return (
     <div className="app max-w-md mx-auto mt-2 sm:mt-6 md:mt-12 p-5 mb-4">
@@ -190,59 +210,39 @@ function App() {
         <h1 className="text-white font-bold text-xl tracking-widest">
           {!session && isLoading ? "Loading..." : session?.title}
         </h1>
-        <div className="flex items-center">
-          <button
+        <div className="flex items-center justify-between w-28">
+          <IconButton
             onClick={() => {
               navigator.clipboard.writeText(window.location.origin + "/?session_id=" + session?.id);
             }}
-            className="text-white mr-4 text-md"
           >
             <BsShare />
-          </button>
-          <button className="keyboard-btn relative text-white text-xl p-1 focus:outline-none border border-transparent focus:border-white rounded-md">
+          </IconButton>
+          <IconButton className="keyboard-button">
             <BsKeyboard />
             <KeyboardDropdown />
-          </button>
-          <button
+          </IconButton>
+          <IconButton
             onClick={() => {
               setIsTaskModalVisible(true);
             }}
-            className="text-white text-md p-1 focus:outline-none border border-transparent focus:border-white rounded-md"
           >
             <BsPlusLg />
-          </button>
+          </IconButton>
         </div>
       </div>
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2">Todo</h2>
       {!data.length && isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
-      {data?.map((task) => (
-        <AnimatePresence>
-          {!task.completed_at && task.hidden !== true && (
-            <motion.div
-              className="overflow-hidden"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <Task onDelete={onDelete} onCheck={onCheck} onClick={onSelect} task={task}></Task>
-            </motion.div>
-          )}
+      {incompleted.map((task) => (
+        <AnimatePresence key={task.id}>
+          <Task onCheck={onCheck} onSelect={onSelect} task={task} />
         </AnimatePresence>
       ))}
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2 mt-4">Completed</h2>
       {!data.length && isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
-      {data?.map((task) => (
-        <AnimatePresence>
-          {task.completed_at && task.hidden !== true && (
-            <motion.div
-              className="overflow-hidden"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <Task onDelete={onDelete} onCheck={onCheck} onClick={onSelect} task={task}></Task>
-            </motion.div>
-          )}
+      {completed.map((task) => (
+        <AnimatePresence key={task.id}>
+          <Task onCheck={onCheck} onSelect={onSelect} task={task} />
         </AnimatePresence>
       ))}
       <div className="fixed top-32 max-w-md left-1/2 p-4 w-full md:w-1/2 -translate-x-1/2 z-10">

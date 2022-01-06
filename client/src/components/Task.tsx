@@ -1,24 +1,26 @@
-import { motion } from "framer-motion";
+import { HTMLMotionProps, motion } from "framer-motion";
 import { FaCheckCircle } from "react-icons/fa";
 import { ITaskResponse } from "../api/response";
 
-export interface TaskProps {
+export interface TaskProps extends Omit<HTMLMotionProps<"div">, "onSelect"> {
   task: ITaskResponse;
   onCheck: (task: ITaskResponse) => void;
-  onClick: (task: ITaskResponse) => void;
-  onDelete: (task: ITaskResponse) => void;
+  onSelect: (task: ITaskResponse) => void;
 }
 
-const Task: React.FC<TaskProps> = ({ task, onCheck, onClick, onDelete }) => {
+const Task: React.FC<TaskProps> = ({ task, onCheck, onSelect }) => {
   return (
     <motion.div
       tabIndex={0}
       id={`task-${task.id}`}
-      className="w-full mb-2 text-white p-3 rounded-lg px-4 todo focus:outline-none focus:border-white task"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, height: 0 }}
+      className="task w-full mb-2 text-white p-3 rounded-lg px-4 todo focus:outline-none focus:border-white"
       style={{
         background: "rgba(0, 0, 0, 0.1)",
       }}
-      onClick={() => onClick(task)}
+      onClick={() => onSelect(task)}
     >
       <motion.div className="flex">
         <motion.div
