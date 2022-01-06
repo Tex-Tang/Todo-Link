@@ -56,7 +56,7 @@ function App() {
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "c" && selectedTask === null) {
+    if (e.key === "c" && selectedTask === null && !isTaskModalVisible) {
       setIsTaskModalVisible(true);
       e.preventDefault();
       document.querySelector("input")?.focus();
