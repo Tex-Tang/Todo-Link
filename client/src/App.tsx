@@ -213,7 +213,7 @@ function App() {
           >
             <BsShare />
           </IconButton>
-          <IconButton className="keyboard-button">
+          <IconButton className="keyboard-btn">
             <BsKeyboard />
             <KeyboardDropdown />
           </IconButton>

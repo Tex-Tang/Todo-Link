@@ -1,7 +1,7 @@
 export default function KeyboardDropdown() {
   return (
-    <div className="shortcuts-container p-2 absolute bot-0 -right-9 w-64 z-20 hidden">
-      <div className="task-modal text-left w-full p-2 py-3 text-sm rounded-lg">
+    <div className="shortcuts-container p-2 absolute bot-0 -right-12 w-64 z-20 hidden">
+      <div className="shortcuts text-left w-full p-2 text-sm rounded-lg">
         <div className="flex items-center mb-2">
           <span className="font-mono px-2 py-0.5 bg-gray-800 create-btn mr-1">c</span> Create task
         </div>
