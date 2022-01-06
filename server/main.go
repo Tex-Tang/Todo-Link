@@ -1,9 +1,11 @@
+//go:generate sqlboiler --config app.toml --pkgname model psql
+
 package main
 
 import (
 	"database/sql"
 
-	"github.com/Tex-Tang/Todo-Link/server/models"
+	"github.com/Tex-Tang/Todo-Link/server/model"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/segmentio/ksuid"
@@ -39,7 +41,7 @@ func main() {
 	sessionsApi := api.Group("/sessions")
 
 	sessionsApi.Post("/", func(c *fiber.Ctx) error {
-		session := &models.Session{
+		session := &model.Session{
 			ID:    ksuid.New().String(),
 			Title: "Tasks list",
 		}
@@ -53,7 +55,7 @@ func main() {
 	})
 
 	sessionsApi.Get("/:id", func(c *fiber.Ctx) error {
-		session, err := models.FindSession(c.Context(), conn, c.Params("id"))
+		session, err := model.FindSession(c.Context(), conn, c.Params("id"))
 		if err != nil && err != sql.ErrNoRows {
 			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 		} else if err == sql.ErrNoRows {
@@ -71,7 +73,7 @@ func main() {
 			return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 		}
 
-		session, err := models.FindSession(c.Context(), conn, request.SessionID)
+		session, err := model.FindSession(c.Context(), conn, request.SessionID)
 
 		if err != nil && err != sql.ErrNoRows {
 			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
@@ -79,7 +81,7 @@ func main() {
 			return c.Status(404).JSON(fiber.Map{"error": "Session not found"})
 		}
 
-		tasks, err := models.Tasks(models.TaskWhere.SessionID.EQ(session.ID)).All(c.Context(), conn)
+		tasks, err := model.Tasks(model.TaskWhere.SessionID.EQ(session.ID)).All(c.Context(), conn)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
@@ -94,7 +96,7 @@ func main() {
 			})
 		}
 
-		session, err := models.Sessions(models.SessionWhere.ID.EQ(request.SessionID)).One(c.Context(), conn)
+		session, err := model.Sessions(model.SessionWhere.ID.EQ(request.SessionID)).One(c.Context(), conn)
 		if err != nil && err != sql.ErrNoRows {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"message": err.Error(),
@@ -105,7 +107,7 @@ func main() {
 			})
 		}
 
-		task := models.Task{
+		task := model.Task{
 			ID:        ksuid.New().String(),
 			Title:     request.Title,
 			SessionID: session.ID,
@@ -130,7 +132,7 @@ func main() {
 			})
 		}
 
-		task, err := models.FindTask(c.Context(), conn, c.Params("id"))
+		task, err := model.FindTask(c.Context(), conn, c.Params("id"))
 		if err != nil && err != sql.ErrNoRows {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"message": err.Error(),
@@ -157,7 +159,7 @@ func main() {
 	})
 
 	tasksApi.Delete("/:id", func(c *fiber.Ctx) error {
-		task, err := models.FindTask(c.Context(), conn, c.Params("id"))
+		task, err := model.FindTask(c.Context(), conn, c.Params("id"))
 		if err != nil && err != sql.ErrNoRows {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"message": err.Error(),
