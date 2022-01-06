@@ -109,11 +109,10 @@ function App() {
     } else {
       setIncompleted(incompleted.filter((t) => t.id !== task.id));
     }
+    setSelectedTask(null);
+    nextIdToFocus && focusTaskElement(nextIdToFocus);
     DeleteTask(task.id)
-      .then(() => {
-        setSelectedTask(null);
-        nextIdToFocus && focusTaskElement(nextIdToFocus);
-      })
+      .then(() => {})
       .catch(() => {
         if (task.completed_at) {
           setCompleted([...completed, task]);
@@ -207,9 +206,7 @@ function App() {
         )}
       </AnimatePresence>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-white font-bold text-xl tracking-widest">
-          {!session && isLoading ? "Loading..." : session?.title}
-        </h1>
+        <h1 className="text-white font-bold text-xl tracking-widest">{session ? session?.title : "Loading..."}</h1>
         <div className="flex items-center justify-between w-28">
           <IconButton
             onClick={() => {
@@ -232,14 +229,14 @@ function App() {
         </div>
       </div>
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2">Todo</h2>
-      {!data.length && isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
+      {!data.length && <div className="text-gray-300 text-sm">Loading...</div>}
       {incompleted.map((task) => (
         <AnimatePresence key={task.id}>
           <Task onCheck={onCheck} onSelect={onSelect} task={task} />
         </AnimatePresence>
       ))}
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2 mt-4">Completed</h2>
-      {!data.length && isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
+      {!data.length && <div className="text-gray-300 text-sm">Loading...</div>}
       {completed.map((task) => (
         <AnimatePresence key={task.id}>
           <Task onCheck={onCheck} onSelect={onSelect} task={task} />
