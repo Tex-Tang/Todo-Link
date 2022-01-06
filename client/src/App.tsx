@@ -96,14 +96,16 @@ function App() {
 
   const onDelete = (task: ITaskResponse) => {
     const nextIdToFocus = getTaskElementId("next", task.id);
-    setData(data.filter((t) => t.id !== task.id));
+    task.hidden = true;
+    setData([...data]);
     DeleteTask(task.id)
       .then(() => {
         setSelectedTask(null);
         nextIdToFocus && focusTaskElement(nextIdToFocus);
       })
       .catch(() => {
-        setData([...data, task]);
+        task.hidden = false;
+        setData([...data]);
       });
   };
 
@@ -203,7 +205,7 @@ function App() {
       {!data.length && isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
       {data?.map((task) => (
         <AnimatePresence>
-          {!task.completed_at && (
+          {!task.completed_at && task.hidden !== true && (
             <motion.div
               className="overflow-hidden"
               initial={{ opacity: 0, y: 10 }}
@@ -219,7 +221,7 @@ function App() {
       {!data.length && isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
       {data?.map((task) => (
         <AnimatePresence>
-          {task.completed_at && (
+          {task.completed_at && task.hidden !== true && (
             <motion.div
               className="overflow-hidden"
               initial={{ opacity: 0, y: 10 }}
