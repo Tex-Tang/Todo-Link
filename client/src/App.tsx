@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { BsArrowClockwise, BsKeyboard, BsPlusLg, BsShare } from "react-icons/bs";
+import { BsArrowClockwise, BsKeyboard, BsPlusLg } from "react-icons/bs";
 import { useQuery } from "react-query";
 import { IUpdateTaskRequest } from "./api/request";
 import { ITaskResponse } from "./api/response";
@@ -8,6 +8,7 @@ import { DeleteTask, ListTasks, UpdateTask } from "./api/tasks";
 import AddTaskModal from "./components/AddTaskModal";
 import IconButton from "./components/IconButton";
 import KeyboardDropdown from "./components/KeyboardDropdown";
+import ShareButton from "./components/ShareButton";
 import Task from "./components/Task";
 import TaskModal from "./components/TaskModal";
 import useSession from "./hooks/useSession";
@@ -211,14 +212,7 @@ function App() {
           <IconButton tabIndex={2} onClick={refresh}>
             <BsArrowClockwise />
           </IconButton>
-          <IconButton
-            tabIndex={2}
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.origin + "/?session_id=" + session?.id);
-            }}
-          >
-            <BsShare />
-          </IconButton>
+          <ShareButton />
           <IconButton tabIndex={2} className="keyboard-btn">
             <BsKeyboard />
             <KeyboardDropdown />
