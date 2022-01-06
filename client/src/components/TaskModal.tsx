@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { AiOutlineCloseCircle } from "react-icons/ai";
+import { useMutation } from "react-query";
+import { IUpdateTaskRequest } from "../api/request";
 import { ITaskResponse } from "../api/response";
+import { UpdateTask } from "../api/tasks";
 
 export interface TaskModalProps {
   task: ITaskResponse;
@@ -34,6 +37,17 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onDelete, onEdit, onClose }
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [editable]);
 
+  const updateTaskMutation = useMutation(
+    ["update-task", task.id],
+    (data: IUpdateTaskRequest) => UpdateTask(task.id, data),
+    {
+      onSuccess: (data) => {
+        onEdit(data);
+        setEditable(false);
+      },
+    }
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -44,7 +58,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onDelete, onEdit, onClose }
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          onEdit(task);
+          updateTaskMutation.mutate(task);
         }}
       >
         <motion.div className="flex mb-2 justify-between items-center">
@@ -59,6 +73,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onDelete, onEdit, onClose }
             onChange={(e) => {
               task.title = e.target.value;
             }}
+            disabled={updateTaskMutation.isLoading}
             defaultValue={task.title}
             type="text"
             placeholder="Title"
@@ -67,7 +82,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onDelete, onEdit, onClose }
         )}
         <motion.div className="flex justify-end mt-2">
           <motion.button type="submit" className={`create-btn px-3 py-1 ${editable ? "" : "hidden"}`}>
-            Done
+            {updateTaskMutation.isLoading ? "Saving..." : "Save"}
           </motion.button>
           {!editable && (
             <>

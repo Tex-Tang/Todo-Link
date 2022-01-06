@@ -69,6 +69,18 @@ function App() {
     if (nextId) focusTaskElement(nextId);
   };
 
+  const focusNextTask = (id: string) => {
+    let idToFocus = getTaskElementId("prev", id);
+    if (id === completed?.[0]?.id || id === incompleted?.[0]?.id) {
+      if (completed.length === 1 || incompleted.length === 1) {
+        idToFocus = id;
+      } else {
+        idToFocus = getTaskElementId("next", id);
+      }
+    }
+    idToFocus && focusTaskElement(idToFocus);
+  };
+
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "c" && selectedTask === null && !isTaskModalVisible) {
       setIsTaskModalVisible(true);
@@ -95,13 +107,10 @@ function App() {
           e.preventDefault();
           setSelectedTask(task);
         } else if (e.key === "Backspace") {
+          focusNextTask(task.id);
           onDelete(task);
         } else if (e.key === "Enter") {
-          let idToFocus = getTaskElementId("prev", task.id);
-          if (task.id === completed[0].id || task.id === incompleted[0].id) {
-            idToFocus = getTaskElementId("next", task.id);
-          }
-          idToFocus && focusTaskElement(idToFocus);
+          focusNextTask(task.id);
           onCheck(task);
         }
       }
@@ -109,14 +118,12 @@ function App() {
   };
 
   const onDelete = (task: ITaskResponse) => {
-    const nextIdToFocus = getTaskElementId("next", task.id);
     if (task.completed_at) {
       setCompleted(completed.filter((t) => t.id !== task.id));
     } else {
       setIncompleted(incompleted.filter((t) => t.id !== task.id));
     }
     setSelectedTask(null);
-    nextIdToFocus && focusTaskElement(nextIdToFocus);
     DeleteTask(task.id)
       .then(() => {})
       .catch(() => {
@@ -148,6 +155,7 @@ function App() {
       setIncompleted([...incompleted, { ...task, completed_at: null }]);
     }
 
+    focusNextTask(task.id);
     UpdateTask(task.id, dataToUpdate)
       .then(() => {})
       .catch(() => {
@@ -166,23 +174,17 @@ function App() {
   };
 
   const onEdit = (task: ITaskResponse) => {
-    if (selectedTask) {
-      if (task.completed_at) {
-        setCompleted(completed.filter((t) => t.id !== task.id));
-        setIncompleted([...incompleted, task]);
-      } else {
-        setIncompleted(incompleted.filter((t) => t.id !== task.id));
-        setCompleted([...completed, task]);
-      }
-      UpdateTask(selectedTask.id, task)
-        .then(() => {
-          focusTask("current", selectedTask.id);
-          setSelectedTask(null);
-        })
-        .catch(() => {
-          refetch();
-        });
+    if (task.completed_at) {
+      const index = completed.findIndex((t) => t.id === task.id);
+      completed[index] = task;
+      setCompleted([...completed]);
+    } else {
+      const index = incompleted.findIndex((t) => t.id === task.id);
+      incompleted[index] = task;
+      setIncompleted([...incompleted]);
     }
+    setSelectedTask(null);
+    focusTask("current", task.id);
   };
 
   useEffect(() => {

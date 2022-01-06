@@ -39,7 +39,7 @@ const Task: React.FC<TaskProps> = ({ task, onCheck, onSelect }) => {
           )}
         </motion.div>
 
-        <motion.p>{task.title}</motion.p>
+        <motion.div className="break-all">{task.title}</motion.div>
       </motion.div>
     </motion.div>
   );
