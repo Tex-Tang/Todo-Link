@@ -7,7 +7,12 @@ export default function useSession() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const refresh = () => {
+    localStorage.removeItem("SESSION_ID");
+    retrieveSession();
+  };
+
+  const retrieveSession = () => {
     setIsLoading(true);
     setError(null);
 
@@ -15,6 +20,7 @@ export default function useSession() {
     const params = Object.fromEntries(urlSearchParams.entries());
 
     const sessionId = localStorage.getItem("SESSION_ID") || params.session_id;
+
     if (!sessionId) {
       CreateSession({
         title: "Tasks List",
@@ -42,10 +48,15 @@ export default function useSession() {
           setIsLoading(false);
         });
     }
+  };
+
+  useEffect(() => {
+    retrieveSession();
   }, []);
 
   return {
     session,
+    refresh,
     isLoading,
     error,
   };

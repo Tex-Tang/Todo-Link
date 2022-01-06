@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { BsKeyboard, BsPlusLg, BsShare } from "react-icons/bs";
+import { BsArrowClockwise, BsKeyboard, BsPlusLg, BsShare } from "react-icons/bs";
 import { useQuery } from "react-query";
 import { IUpdateTaskRequest } from "./api/request";
 import { ITaskResponse } from "./api/response";
@@ -20,7 +20,7 @@ const focusTaskElement = (id: string) => {
 };
 
 function App() {
-  const { session } = useSession();
+  const { session, refresh } = useSession();
 
   const { isLoading, refetch } = useQuery(
     ["list-tasks", session],
@@ -30,6 +30,9 @@ function App() {
         if (data) {
           setCompleted(data.filter((task) => task.completed_at));
           setIncompleted(data.filter((task) => !task.completed_at));
+        } else {
+          setCompleted([]);
+          setIncompleted([]);
         }
       },
     }
@@ -204,7 +207,10 @@ function App() {
       </AnimatePresence>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-white font-bold text-xl tracking-widest">{session ? session?.title : "Loading..."}</h1>
-        <div className="flex items-center justify-between w-28">
+        <div className="flex items-center justify-between w-32">
+          <IconButton tabIndex={2} onClick={refresh}>
+            <BsArrowClockwise />
+          </IconButton>
           <IconButton
             tabIndex={2}
             onClick={() => {
@@ -228,19 +234,25 @@ function App() {
         </div>
       </div>
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2">Todo</h2>
-      {(!session || isLoading) && <div className="text-gray-300 text-sm">Loading...</div>}
-      {incompleted.map((task) => (
-        <AnimatePresence key={task.id}>
-          <Task onCheck={onCheck} onSelect={onSelect} task={task} />
-        </AnimatePresence>
-      ))}
+      {!session || isLoading ? (
+        <div className="text-gray-300 text-sm">Loading...</div>
+      ) : (
+        incompleted.map((task) => (
+          <AnimatePresence key={task.id}>
+            <Task onCheck={onCheck} onSelect={onSelect} task={task} />
+          </AnimatePresence>
+        ))
+      )}
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2 mt-4">Completed</h2>
-      {(!session || isLoading) && <div className="text-gray-300 text-sm">Loading...</div>}
-      {completed.map((task) => (
-        <AnimatePresence key={task.id}>
-          <Task onCheck={onCheck} onSelect={onSelect} task={task} />
-        </AnimatePresence>
-      ))}
+      {!session || isLoading ? (
+        <div className="text-gray-300 text-sm">Loading...</div>
+      ) : (
+        completed.map((task) => (
+          <AnimatePresence key={task.id}>
+            <Task onCheck={onCheck} onSelect={onSelect} task={task} />
+          </AnimatePresence>
+        ))
+      )}
       <div className="fixed top-32 max-w-md left-1/2 p-4 w-full md:w-1/2 -translate-x-1/2 z-10">
         {selectedTask && (
           <TaskModal
