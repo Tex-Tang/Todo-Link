@@ -337,6 +337,11 @@ func AddSessionHook(hookPoint boil.HookPoint, sessionHook SessionHook) {
 	}
 }
 
+// OneG returns a single session record from the query using the global executor.
+func (q sessionQuery) OneG(ctx context.Context) (*Session, error) {
+	return q.One(ctx, boil.GetContextDB())
+}
+
 // One returns a single session record from the query.
 func (q sessionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Session, error) {
 	o := &Session{}
@@ -356,6 +361,11 @@ func (q sessionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Sess
 	}
 
 	return o, nil
+}
+
+// AllG returns all Session records from the query using the global executor.
+func (q sessionQuery) AllG(ctx context.Context) (SessionSlice, error) {
+	return q.All(ctx, boil.GetContextDB())
 }
 
 // All returns all Session records from the query.
@@ -378,6 +388,11 @@ func (q sessionQuery) All(ctx context.Context, exec boil.ContextExecutor) (Sessi
 	return o, nil
 }
 
+// CountG returns the count of all Session records in the query, and panics on error.
+func (q sessionQuery) CountG(ctx context.Context) (int64, error) {
+	return q.Count(ctx, boil.GetContextDB())
+}
+
 // Count returns the count of all Session records in the query.
 func (q sessionQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
@@ -391,6 +406,11 @@ func (q sessionQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int
 	}
 
 	return count, nil
+}
+
+// ExistsG checks if the row exists in the table, and panics on error.
+func (q sessionQuery) ExistsG(ctx context.Context) (bool, error) {
+	return q.Exists(ctx, boil.GetContextDB())
 }
 
 // Exists checks if the row exists in the table.
@@ -528,6 +548,15 @@ func (sessionL) LoadTasks(ctx context.Context, e boil.ContextExecutor, singular 
 	return nil
 }
 
+// AddTasksG adds the given related objects to the existing relationships
+// of the session, optionally inserting them as new records.
+// Appends related to o.R.Tasks.
+// Sets related.R.Session appropriately.
+// Uses the global database handle.
+func (o *Session) AddTasksG(ctx context.Context, insert bool, related ...*Task) error {
+	return o.AddTasks(ctx, boil.GetContextDB(), insert, related...)
+}
+
 // AddTasks adds the given related objects to the existing relationships
 // of the session, optionally inserting them as new records.
 // Appends related to o.R.Tasks.
@@ -587,6 +616,11 @@ func Sessions(mods ...qm.QueryMod) sessionQuery {
 	return sessionQuery{NewQuery(mods...)}
 }
 
+// FindSessionG retrieves a single record by ID.
+func FindSessionG(ctx context.Context, iD string, selectCols ...string) (*Session, error) {
+	return FindSession(ctx, boil.GetContextDB(), iD, selectCols...)
+}
+
 // FindSession retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
 func FindSession(ctx context.Context, exec boil.ContextExecutor, iD string, selectCols ...string) (*Session, error) {
@@ -615,6 +649,11 @@ func FindSession(ctx context.Context, exec boil.ContextExecutor, iD string, sele
 	}
 
 	return sessionObj, nil
+}
+
+// InsertG a single record. See Insert for whitelist behavior description.
+func (o *Session) InsertG(ctx context.Context, columns boil.Columns) error {
+	return o.Insert(ctx, boil.GetContextDB(), columns)
 }
 
 // Insert a single record using an executor.
@@ -703,6 +742,12 @@ func (o *Session) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
+// UpdateG a single Session record using the global executor.
+// See Update for more documentation.
+func (o *Session) UpdateG(ctx context.Context, columns boil.Columns) (int64, error) {
+	return o.Update(ctx, boil.GetContextDB(), columns)
+}
+
 // Update uses an executor to update the Session.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
@@ -766,6 +811,11 @@ func (o *Session) Update(ctx context.Context, exec boil.ContextExecutor, columns
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
+// UpdateAllG updates all rows with the specified column values.
+func (q sessionQuery) UpdateAllG(ctx context.Context, cols M) (int64, error) {
+	return q.UpdateAll(ctx, boil.GetContextDB(), cols)
+}
+
 // UpdateAll updates all rows with the specified column values.
 func (q sessionQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
@@ -781,6 +831,11 @@ func (q sessionQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	return rowsAff, nil
+}
+
+// UpdateAllG updates all rows with the specified column values.
+func (o SessionSlice) UpdateAllG(ctx context.Context, cols M) (int64, error) {
+	return o.UpdateAll(ctx, boil.GetContextDB(), cols)
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
@@ -829,6 +884,11 @@ func (o SessionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 		return 0, errors.Wrap(err, "model: unable to retrieve rows affected all in update all session")
 	}
 	return rowsAff, nil
+}
+
+// UpsertG attempts an insert, and does an update or ignore on conflict.
+func (o *Session) UpsertG(ctx context.Context, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+	return o.Upsert(ctx, boil.GetContextDB(), updateOnConflict, conflictColumns, updateColumns, insertColumns)
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
@@ -953,6 +1013,12 @@ func (o *Session) Upsert(ctx context.Context, exec boil.ContextExecutor, updateO
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
+// DeleteG deletes a single Session record.
+// DeleteG will match against the primary key column to find the record to delete.
+func (o *Session) DeleteG(ctx context.Context) (int64, error) {
+	return o.Delete(ctx, boil.GetContextDB())
+}
+
 // Delete deletes a single Session record with an executor.
 // Delete will match against the primary key column to find the record to delete.
 func (o *Session) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
@@ -989,6 +1055,10 @@ func (o *Session) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 	return rowsAff, nil
 }
 
+func (q sessionQuery) DeleteAllG(ctx context.Context) (int64, error) {
+	return q.DeleteAll(ctx, boil.GetContextDB())
+}
+
 // DeleteAll deletes all matching rows.
 func (q sessionQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
@@ -1008,6 +1078,11 @@ func (q sessionQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 	}
 
 	return rowsAff, nil
+}
+
+// DeleteAllG deletes all rows in the slice.
+func (o SessionSlice) DeleteAllG(ctx context.Context) (int64, error) {
+	return o.DeleteAll(ctx, boil.GetContextDB())
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
@@ -1059,6 +1134,15 @@ func (o SessionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 	return rowsAff, nil
 }
 
+// ReloadG refetches the object from the database using the primary keys.
+func (o *Session) ReloadG(ctx context.Context) error {
+	if o == nil {
+		return errors.New("model: no Session provided for reload")
+	}
+
+	return o.Reload(ctx, boil.GetContextDB())
+}
+
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *Session) Reload(ctx context.Context, exec boil.ContextExecutor) error {
@@ -1069,6 +1153,16 @@ func (o *Session) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 	*o = *ret
 	return nil
+}
+
+// ReloadAllG refetches every row with matching primary key column values
+// and overwrites the original object slice with the newly updated slice.
+func (o *SessionSlice) ReloadAllG(ctx context.Context) error {
+	if o == nil {
+		return errors.New("model: empty SessionSlice provided for reload all")
+	}
+
+	return o.ReloadAll(ctx, boil.GetContextDB())
 }
 
 // ReloadAll refetches every row with matching primary key column values
@@ -1098,6 +1192,11 @@ func (o *SessionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 	*o = slice
 
 	return nil
+}
+
+// SessionExistsG checks if the Session row exists.
+func SessionExistsG(ctx context.Context, iD string) (bool, error) {
+	return SessionExists(ctx, boil.GetContextDB(), iD)
 }
 
 // SessionExists checks if the Session row exists.
