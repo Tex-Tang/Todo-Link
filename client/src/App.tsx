@@ -22,8 +22,6 @@ const focusTaskElement = (id: string) => {
 function App() {
   const { session } = useSession();
 
-  const [data, setData] = useState<ITaskResponse[]>([]);
-
   const { isLoading, refetch } = useQuery(
     ["list-tasks", session],
     () => (session ? ListTasks({ session_id: session.id }) : null),
@@ -229,14 +227,14 @@ function App() {
         </div>
       </div>
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2">Todo</h2>
-      {isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
+      {(!session || isLoading) && <div className="text-gray-300 text-sm">Loading...</div>}
       {incompleted.map((task) => (
         <AnimatePresence key={task.id}>
           <Task onCheck={onCheck} onSelect={onSelect} task={task} />
         </AnimatePresence>
       ))}
       <h2 className="text-gray-300 uppercase font-semibold text-sm tracking-widest mb-2 mt-4">Completed</h2>
-      {isLoading && <div className="text-gray-300 text-sm">Loading...</div>}
+      {(!session || isLoading) && <div className="text-gray-300 text-sm">Loading...</div>}
       {completed.map((task) => (
         <AnimatePresence key={task.id}>
           <Task onCheck={onCheck} onSelect={onSelect} task={task} />
