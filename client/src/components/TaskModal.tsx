@@ -7,15 +7,19 @@ import { ITaskResponse } from "../api/response";
 import { UpdateTask } from "../api/tasks";
 
 export interface TaskModalProps {
+  editable?: boolean;
   task: ITaskResponse;
   onClose: () => void;
   onEdit: (task: ITaskResponse) => void;
   onDelete: (task: ITaskResponse) => void;
 }
 
-const TaskModal: React.FC<TaskModalProps> = ({ task, onDelete, onEdit, onClose }) => {
+const TaskModal: React.FC<TaskModalProps> = ({ editable: defaultEditable, task, onDelete, onEdit, onClose }) => {
   const titleRef = useRef<HTMLInputElement>(null);
-  const [editable, setEditable] = useState(false);
+  const [editable, setEditable] = useState(defaultEditable || false);
+  useEffect(() => {
+    setEditable(defaultEditable || false);
+  }, [defaultEditable]);
 
   useEffect(() => {
     if (editable) {
@@ -50,8 +54,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ task, onDelete, onEdit, onClose }
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
       layoutId={task.id.toString()}
       className="task-modal w-full p-4"
     >

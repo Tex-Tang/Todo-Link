@@ -44,6 +44,7 @@ function App() {
 
   const [selectedTask, setSelectedTask] = useState<ITaskResponse | null>(null);
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
+  const [isTaskModalEditable, setIsTaskModalEditable] = useState(false);
 
   const getTaskElementId = (dir: string, id: string) => {
     const data = [...incompleted, ...completed];
@@ -70,13 +71,13 @@ function App() {
   };
 
   const focusNextTask = (id: string) => {
-    let idToFocus = getTaskElementId("prev", id);
-    if (id === completed?.[0]?.id || id === incompleted?.[0]?.id) {
-      if (completed.length === 1 || incompleted.length === 1) {
-        idToFocus = id;
-      } else {
-        idToFocus = getTaskElementId("next", id);
-      }
+    let idToFocus = getTaskElementId("next", id);
+    const data = [...incompleted, ...completed];
+    const index = data.findIndex((task) => task.id === id);
+    if (index === 0 && (incompleted.length === 1 || completed.length === 1)) {
+      idToFocus = id;
+    } else if (index === incompleted.length - 1 || index === data.length - 1) {
+      idToFocus = getTaskElementId("prev", id);
     }
     idToFocus && focusTaskElement(idToFocus);
   };
@@ -87,9 +88,13 @@ function App() {
       e.preventDefault();
       document.querySelector("input")?.focus();
     }
-    if (e.key === "Escape") {
+    if (e.key === "Escape" && isTaskModalVisible) {
       setIsTaskModalVisible(false);
-      setSelectedTask(null);
+      setIsTaskModalEditable(false);
+      if (selectedTask) {
+        focusTaskElement(selectedTask.id);
+        setSelectedTask(null);
+      }
     }
 
     if (document.activeElement?.id.includes("task")) {
@@ -106,6 +111,7 @@ function App() {
         if (e.key === "e") {
           e.preventDefault();
           setSelectedTask(task);
+          setIsTaskModalEditable(true);
         } else if (e.key === "Backspace") {
           focusNextTask(task.id);
           onDelete(task);
@@ -252,6 +258,7 @@ function App() {
       <div className="fixed top-32 max-w-md left-1/2 p-4 w-full md:w-1/2 -translate-x-1/2 z-10">
         {selectedTask && (
           <TaskModal
+            editable={isTaskModalEditable}
             onDelete={onDelete}
             onEdit={onEdit}
             onClose={() => {
