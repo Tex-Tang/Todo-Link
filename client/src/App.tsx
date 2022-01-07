@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { BsArrowClockwise, BsKeyboard, BsPlusLg } from "react-icons/bs";
+import { BsKeyboard, BsPlusLg } from "react-icons/bs";
 import { useQuery } from "react-query";
 import { IUpdateTaskRequest } from "./api/request";
 import { ITaskResponse } from "./api/response";
@@ -8,6 +8,7 @@ import { DeleteTask, ListTasks, UpdateTask } from "./api/tasks";
 import AddTaskModal from "./components/AddTaskModal";
 import IconButton from "./components/IconButton";
 import KeyboardDropdown from "./components/KeyboardDropdown";
+import RefreshButton from "./components/RefreshButton";
 import ShareButton from "./components/ShareButton";
 import Task from "./components/Task";
 import TaskModal from "./components/TaskModal";
@@ -217,9 +218,7 @@ function App() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-white font-bold text-xl tracking-widest">{session ? session?.title : "Loading..."}</h1>
         <div className="flex items-center justify-between w-36">
-          <IconButton tabIndex={2} onClick={refresh}>
-            <BsArrowClockwise />
-          </IconButton>
+          <RefreshButton />
           <ShareButton />
           <IconButton tabIndex={2} className="keyboard-btn">
             <BsKeyboard />
