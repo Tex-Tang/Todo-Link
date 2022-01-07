@@ -114,7 +114,13 @@ function App() {
           setSelectedTask(task);
           setIsTaskModalEditable(true);
         } else if (e.key === "Backspace") {
-          focusNextTask(task.id);
+          if (task.id === completed?.[0]?.id && completed.length === 1) {
+            focusTask("prev", task.id);
+          } else if (task.id === incompleted?.[0]?.id && incompleted.length === 1) {
+            focusTask("next", task.id);
+          } else {
+            focusNextTask(task.id);
+          }
           onDelete(task);
         } else if (e.key === "Enter") {
           focusNextTask(task.id);
