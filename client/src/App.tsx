@@ -22,9 +22,9 @@ const focusTaskElement = (id: string) => {
 };
 
 function App() {
-  const { session, refresh } = useSession();
+  const { session } = useSession();
 
-  const { isLoading, refetch } = useQuery(
+  const { isLoading } = useQuery(
     ["list-tasks", session],
     () => (session ? ListTasks({ session_id: session.id }) : null),
     {
