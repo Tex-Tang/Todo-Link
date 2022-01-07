@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { useMutation } from "react-query";
 import { IUpdateTaskRequest } from "../api/request";
@@ -15,15 +16,18 @@ export interface TaskModalProps {
 }
 
 const TaskModal: React.FC<TaskModalProps> = ({ editable: defaultEditable, task, onDelete, onEdit, onClose }) => {
-  const titleRef = useRef<HTMLInputElement>(null);
   const [editable, setEditable] = useState(defaultEditable || false);
   useEffect(() => {
     setEditable(defaultEditable || false);
   }, [defaultEditable]);
 
   useEffect(() => {
+    setValue("title", task.title);
+  }, [task]);
+
+  useEffect(() => {
     if (editable) {
-      titleRef.current?.focus();
+      document.getElementById("title-input")?.focus();
     }
   }, [editable]);
 
@@ -40,6 +44,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ editable: defaultEditable, task, 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [editable]);
+
+  const { register, handleSubmit, setValue } = useForm<IUpdateTaskRequest>({ defaultValues: { title: task.title } });
 
   const updateTaskMutation = useMutation(
     ["update-task", task.id],
@@ -59,12 +65,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editable: defaultEditable, task, 
       layoutId={task.id.toString()}
       className="task-modal w-full p-4"
     >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          updateTaskMutation.mutate(task);
-        }}
-      >
+      <form onSubmit={handleSubmit((data) => updateTaskMutation.mutate(data))}>
         <motion.div className="flex mb-2 justify-between items-center">
           <motion.h2 className="font-semibold">Task Detail</motion.h2>
           <AiOutlineCloseCircle onClick={() => onClose()} className="text-xl" />
@@ -73,12 +74,9 @@ const TaskModal: React.FC<TaskModalProps> = ({ editable: defaultEditable, task, 
           <motion.p>{task.title}</motion.p>
         ) : (
           <input
-            ref={titleRef}
-            onChange={(e) => {
-              task.title = e.target.value;
-            }}
+            {...register("title", { required: true })}
+            id="title-input"
             disabled={updateTaskMutation.isLoading}
-            defaultValue={task.title}
             type="text"
             placeholder="Title"
             className="bg-transparent mb-4 w-full border-gray-400 border rounded px-2 py-2 text-sm focus:border-white focus:outline-none"

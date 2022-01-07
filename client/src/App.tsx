@@ -74,7 +74,7 @@ function App() {
     let idToFocus = getTaskElementId("next", id);
     const data = [...incompleted, ...completed];
     const index = data.findIndex((task) => task.id === id);
-    if (index === 0 && (incompleted.length === 1 || completed.length === 1)) {
+    if ((index === 0 && incompleted.length === 1) || (index === incompleted.length && completed.length === 1)) {
       idToFocus = id;
     } else if (index === incompleted.length - 1 || index === data.length - 1) {
       idToFocus = getTaskElementId("prev", id);
@@ -88,7 +88,7 @@ function App() {
       e.preventDefault();
       document.querySelector("input")?.focus();
     }
-    if (e.key === "Escape" && isTaskModalVisible) {
+    if (e.key === "Escape" && (isTaskModalVisible || selectedTask)) {
       setIsTaskModalVisible(false);
       setIsTaskModalEditable(false);
       if (selectedTask) {
@@ -216,7 +216,7 @@ function App() {
       </AnimatePresence>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-white font-bold text-xl tracking-widest">{session ? session?.title : "Loading..."}</h1>
-        <div className="flex items-center justify-between w-32">
+        <div className="flex items-center justify-between w-36">
           <IconButton tabIndex={2} onClick={refresh}>
             <BsArrowClockwise />
           </IconButton>
