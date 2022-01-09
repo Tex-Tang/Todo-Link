@@ -10,7 +10,7 @@ An accessible, session-based task management app (aka todolist).
 
 ## Technology Stack
 
-**Backend** : Golang ([fiber](https://gofiber.io/)) + PostgreSQL + https://github.com/golang-migrate/migrate
+**Backend** : Golang ([fiber](https://gofiber.io/)) + PostgreSQL + [golang-migrate](https://github.com/golang-migrate/migrate)
 
 **Frontend** : React ([Vite.js](https://vitejs.dev/)) + Tailwind.css
 
