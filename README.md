@@ -25,11 +25,11 @@ Todo-Link
 │  │   ├── hooks
 │  │   └── main.tsx      // Entry point
 │  └── index.html
-└── server               // backend
-   ├── migrations        // golang-migrate
+└── server               // Backend
+   ├── migrations        // Golang-migrate
    ├── model             // Data models
    ├── router            // API Routes
-   ├── config.go         // To read app config
-   ├── app.toml          // Backend config file
+   ├── config.go         // For reading config
+   ├── app.toml          // Config file
    └── main.go
 ```
