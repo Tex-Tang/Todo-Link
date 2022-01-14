@@ -42,7 +42,7 @@ func RetrieveSession(c *fiber.Ctx) error {
 		fmt.Println(err)
 		return ErrInternalServerError
 	} else if err == sql.ErrNoRows {
-		return ErrBadRequest
+		return ErrSessionNotFound
 	}
 
 	return c.JSON(session)
@@ -60,7 +60,7 @@ func UpdateSession(c *fiber.Ctx) error {
 		fmt.Println(err)
 		return ErrInternalServerError
 	} else if err == sql.ErrNoRows {
-		return ErrBadRequest
+		return ErrSessionNotFound
 	}
 
 	session.Title = request.Title
@@ -73,4 +73,45 @@ func UpdateSession(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(session)
+}
+
+func DeleteSession(c *fiber.Ctx) error {
+	session, err := model.FindSessionG(c.Context(), c.Params("id"))
+
+	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err)
+		return ErrInternalServerError
+	} else if err == sql.ErrNoRows {
+		return ErrSessionNotFound
+	}
+
+	tx, err := boil.BeginTx(c.Context(), nil)
+	if err != nil {
+		return err
+	}
+
+	_, err = model.Tasks(model.TaskWhere.SessionID.EQ(session.ID)).DeleteAll(c.Context(), tx)
+
+	if err != nil {
+		fmt.Println(err)
+		return ErrInternalServerError
+	}
+
+	_, err = session.Delete(c.Context(), tx)
+
+	if err != nil {
+		fmt.Println(err)
+		return ErrInternalServerError
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		fmt.Println(err)
+		return ErrInternalServerError
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Session deleted",
+	})
 }

@@ -10,9 +10,24 @@ export function CreateSession(data: ISessionRequest) {
   });
 }
 
+export function UpdateSession(id: string, data: ISessionRequest) {
+  return request<ISessionResponse>({
+    method: "PUT",
+    url: "/sessions/" + id,
+    data,
+  });
+}
+
 export function RetrieveSession(id: string) {
   return request<ISessionResponse>({
     method: "GET",
+    url: "/sessions/" + id,
+  });
+}
+
+export function DeleteSession(id: string) {
+  return request({
+    method: "DELETE",
     url: "/sessions/" + id,
   });
 }

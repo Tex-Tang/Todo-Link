@@ -22,12 +22,13 @@ const focusTaskElement = (id: string) => {
 };
 
 function App() {
-  const { session } = useSession();
+  const { session, isExternal, import: importSession } = useSession();
 
   const { isLoading } = useQuery(
     ["list-tasks", session],
     () => (session ? ListTasks({ session_id: session.id }) : null),
     {
+      refetchInterval: 60 * 1000,
       onSuccess: (data) => {
         if (data) {
           setCompleted(data.filter((task) => task.completed_at));
@@ -221,6 +222,14 @@ function App() {
           </div>
         )}
       </AnimatePresence>
+      {isExternal && (
+        <div className="px-4 py-4 mb-4 text-white import-banner">
+          <p className="mb-2">This is an external list, Do you want to import it?</p>
+          <button onClick={importSession} className="create-btn py-1 px-3 inline-block">
+            Import
+          </button>
+        </div>
+      )}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-white font-bold text-xl tracking-widest">{session ? session?.title : "Loading..."}</h1>
         <div className="flex items-center justify-between w-36">
@@ -260,8 +269,8 @@ function App() {
           </AnimatePresence>
         ))
       )}
-      <div className="fixed top-32 max-w-md left-1/2 p-4 w-full md:w-1/2 -translate-x-1/2 z-10">
-        {selectedTask && (
+      {selectedTask && (
+        <div className="fixed top-32 max-w-md left-1/2 p-4 w-full md:w-1/2 -translate-x-1/2 z-10">
           <TaskModal
             editable={isTaskModalEditable}
             onDelete={onDelete}
@@ -271,8 +280,8 @@ function App() {
             }}
             task={selectedTask}
           />
-        )}
-      </div>
+        </div>
+      )}
       {(selectedTask || isTaskModalVisible) && (
         <div
           className="fixed top-0 left-0 h-full w-full"

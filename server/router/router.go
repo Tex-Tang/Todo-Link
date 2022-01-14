@@ -13,6 +13,7 @@ func RegisterRoutes(app *fiber.App) {
 	sessionsApi.Post("/", service.CreateSession)
 	sessionsApi.Get("/:id", service.RetrieveSession)
 	sessionsApi.Put("/:id", service.UpdateSession)
+	sessionsApi.Delete("/:id", service.DeleteSession)
 
 	tasksApi := api.Group("/tasks")
 
