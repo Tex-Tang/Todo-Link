@@ -1,4 +1,4 @@
-![Logo](./client/public/Logo.svg)
+![Logo](./client/public/Logo.png)
 
 # Todo Link
 
