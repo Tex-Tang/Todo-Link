@@ -1,3 +1,5 @@
+![Logo](./client/public/Logo.png)
+
 # Todo Link
 
 An accessible, session-based task management app (aka todolist).
